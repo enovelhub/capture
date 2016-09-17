@@ -8,5 +8,5 @@ type Book struct {
 
 type Chapter struct {
 	Title   string `json:"title"`
-	Content string `json:"content"`
+	Content []string `json:"content"`
 }
