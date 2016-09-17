@@ -15,6 +15,7 @@ type Httpool struct {
 }
 
 type HttpoolRequest struct {
+	Ctx context.Context
 	Req *http.Request
 	Res chan *HttpoolResponse
 }
@@ -24,8 +25,9 @@ type HttpoolResponse struct {
 	Err error
 }
 
-func NewRequest(req *http.Request) *HttpoolRequest {
+func NewRequest(ctx context.Context, req *http.Request) *HttpoolRequest {
 	return &HttpoolRequest{
+		Ctx: ctx,
 		Req: req,
 		Res: make(chan *HttpoolResponse, 1),
 	}
@@ -55,11 +57,11 @@ func New(
 				retry := httpool.retry
 
 			Retry:
-				timeoutCtx, _ := context.WithTimeout(
-					context.Background(),
+				ctx, _ := context.WithTimeout(
+					httpoolReq.Ctx,
 					httpool.timeout,
 				)
-				req := httpoolReq.Req.WithContext(timeoutCtx)
+				req := httpoolReq.Req.WithContext(ctx)
 				res, err := client.Do(req)
 				if err != nil && retry > 0 {
 					retry--
@@ -77,17 +79,21 @@ func New(
 	return httpool
 }
 
-func (p *Httpool) Do(req *http.Request) (*http.Response, error) {
-	httpoolReq := NewRequest(req)
+func (p *Httpool) Do(ctx context.Context, req *http.Request) (*http.Response, error) {
+	httpoolReq := NewRequest(ctx, req)
 	p.reqQueue <- httpoolReq
-	httpoolRes := <-httpoolReq.Res
-	return httpoolRes.Res, httpoolRes.Err
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	case httpoolRes := <-httpoolReq.Res:
+		return httpoolRes.Res, httpoolRes.Err
+	}
 }
 
-func (p *Httpool) Get(url string) (resp *http.Response, err error) {
+func (p *Httpool) Get(ctx context.Context, url string) (resp *http.Response, err error) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
-	return p.Do(req)
+	return p.Do(ctx, req)
 }
