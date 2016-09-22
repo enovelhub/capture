@@ -1,19 +1,22 @@
 package rc
 
-import (
-	"github.com/PuerkitoBio/goquery"
-)
-
-type Filter func(doc *goquery.Document) error
-
 type RC struct {
-	domain  string
-	Home    Home
-	Index   Index
-	Chapter Chapter
+	Domain  string
+	Home    *Home
+	Index   *Index
+	Chapter *Chapter
 }
 
-func (rc *RC) Domain(d string) *RC {
-	rc.domain = d
+func New() *RC {
+	return &RC {
+		Domain: "",
+		Home: &Home {},
+		Index: &Index {},
+		Chapter: &Chapter {},
+	}
+}
+
+func (rc *RC) WithDomain(d string) *RC {
+	rc.Domain = d
 	return rc
 }

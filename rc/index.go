@@ -1,10 +1,12 @@
 package rc
 
+import "github.com/mattn/anko/vm"
+
 type Index struct {
-	chapterURL Filter
+	ChapterURL vm.Func
 }
 
-func (i *Index) ChapterURL(f Filter) *Index {
-	i.chapterURL = f
+func (i *Index) WithChapterURL(f vm.Func) *Index {
+	i.ChapterURL = f
 	return i
 }

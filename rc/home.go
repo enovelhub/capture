@@ -1,22 +1,24 @@
 package rc
 
+import "github.com/mattn/anko/vm"
+
 type Home struct {
-	name     Filter
-	author   Filter
-	indexURL Filter
+	Name     vm.Func
+	Author   vm.Func
+	IndexURL vm.Func
 }
 
-func (h *Home) Name(f Filter) *Home {
-	h.name = f
+func (h *Home) WithName(f vm.Func) *Home {
+	h.Name = f
 	return h
 }
 
-func (h *Home) Author(f Filter) *Home {
-	h.author = f
+func (h *Home) WithAuthor(f vm.Func) *Home {
+	h.Author = f
 	return h
 }
 
-func (h *Home) IndexURL(f Filter) *Home {
-	h.indexURL = f
+func (h *Home) WithIndexURL(f vm.Func) *Home {
+	h.IndexURL = f
 	return h
 }
