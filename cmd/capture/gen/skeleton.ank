@@ -1,0 +1,48 @@
+rc.WithDomain("")
+rc.Home.WithAuthor(func(args){
+	doc = ToGoqueryDoc(args[0])
+
+	selector = ""
+	author = doc.Find(selector).Text()
+	Return(author)
+})
+rc.Home.WithName(func(args) {
+	doc = ToGoqueryDoc(args[0])
+
+	selector = ""
+	name = doc.Find(selector).Text()
+	Return(name)
+})
+rc.Home.WithIndexURL(func(args) {
+	doc = ToGoqueryDoc(args[0])
+
+	homeURL,_ = Get("homeURL")
+	Return(homeURL)
+})
+
+rc.Index.WithChapterURL(func(args) {
+	doc = ToGoqueryDoc(args[0])
+
+	selector = ""
+	doc.Find(selector).Each(func(i,s) {
+		href,_ = s.Attr("href")
+			Return(href)
+	})
+})
+
+rc.Chapter.WithTitle(func(args) {
+	doc = ToGoqueryDoc(args[0])
+
+	selector = ""
+	title = doc.Find(selector).Text()
+	Return(title)
+})
+
+rc.Chapter.WithContent(func(args) {
+	doc = ToGoqueryDoc(args[0])
+
+	selector = ""
+	doc.Find(selector).Each(func(i,s) {
+		Return(s.Text())	
+	})
+})
