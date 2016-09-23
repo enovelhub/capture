@@ -101,6 +101,7 @@ func TestEngineExec(t *testing.T) {
 	}
 
 	httpool := httpool.New(http.DefaultClient, 20, time.Second*8, 3)
+	defer httpool.Close()
 	homeURL := "http://freenovelonline.com/241360-i-am-legend.html"
 
 	book, err := en.Exec(httpool, homeURL)
