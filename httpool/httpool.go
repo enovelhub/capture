@@ -84,6 +84,10 @@ func New(
 	return httpool
 }
 
+func (p *Httpool) Close() {
+	close(p.reqQueue)
+}
+
 func (p *Httpool) Do(ctx context.Context, req *http.Request) (*http.Response, error) {
 	httpoolReq := NewRequest(ctx, req)
 	p.reqQueue <- httpoolReq
