@@ -1,0 +1,50 @@
+rc.WithDomain("freenovelonline.com")
+rc.Home.WithAuthor(func(args){
+	doc = ToGoqueryDoc(args[0])
+
+	selector = "#main-content > div > div.detail-top > p:nth-child(3) > a"
+	author = doc.Find(selector).Text()
+	Return(author)
+})
+rc.Home.WithName(func(args) {
+	doc = ToGoqueryDoc(args[0])
+
+	selector = "#main-content > div > div.detail-top > h2"
+	name = doc.Find(selector).Text()
+	Return(name)
+})
+rc.Home.WithIndexURL(func(args) {
+	doc = ToGoqueryDoc(args[0])
+
+	homeURL,_ = Get("homeURL")
+	Return(homeURL)
+})
+
+rc.Index.WithChapterURL(func(args) {
+	doc = ToGoqueryDoc(args[0])
+
+	selector = "#ztitle > li > a"
+	doc.Find(selector).Each(func(i,s) {
+		href,_ = s.Attr("href")
+			Return(href)
+	})
+})
+
+rc.Chapter.WithTitle(func(args) {
+	doc = ToGoqueryDoc(args[0])
+
+	doc.Find(".title a").Remove()
+	selector = ".title"
+	title = doc.Find(selector).Text()
+	Return(title)
+})
+
+rc.Chapter.WithContent(func(args) {
+	doc = ToGoqueryDoc(args[0])
+
+	selector = "#game-width p"
+	doc.Find(selector).Each(func(i,s) {
+		Return(s.Text())	
+	})
+})
+
