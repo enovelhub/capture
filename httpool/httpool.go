@@ -1,3 +1,8 @@
+// Httpool is the pool for http request
+// It provide a easy way for request retry where error happend,
+// and use package context allow caller cancel it.
+// It use gorotine parallely process http request,
+// the size limit the size of gorotines.
 package httpool
 
 import (
@@ -77,6 +82,10 @@ func New(
 	}
 
 	return httpool
+}
+
+func (p *Httpool) Close() {
+	close(p.reqQueue)
 }
 
 func (p *Httpool) Do(ctx context.Context, req *http.Request) (*http.Response, error) {
