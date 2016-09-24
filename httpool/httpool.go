@@ -3,6 +3,8 @@
 // and use package context allow caller cancel it.
 // It use gorotine parallely process http request,
 // the size limit the size of gorotines.
+//
+// BUG: 1. Httpool.timeout is not use now 
 package httpool
 
 import (
@@ -59,19 +61,8 @@ func New(
 	for i := 0; i < size; i++ {
 		go func(httpool *Httpool) {
 			for httpoolReq := range httpool.reqQueue {
-				retry := httpool.retry
-
-			Retry:
-				ctx, _ := context.WithTimeout(
-					httpoolReq.Ctx,
-					httpool.timeout,
-				)
-				req := httpoolReq.Req.WithContext(ctx)
+				req := httpoolReq.Req.WithContext(httpoolReq.Ctx)
 				res, err := client.Do(req)
-				if err != nil && retry > 0 {
-					retry--
-					goto Retry
-				}
 				httpoolReq.Res <- &HttpoolResponse{
 					Res: res,
 					Err: err,
@@ -88,7 +79,7 @@ func (p *Httpool) Close() {
 	close(p.reqQueue)
 }
 
-func (p *Httpool) Do(ctx context.Context, req *http.Request) (*http.Response, error) {
+func (p *Httpool) do(ctx context.Context, req *http.Request) (*http.Response, error) {
 	httpoolReq := NewRequest(ctx, req)
 	p.reqQueue <- httpoolReq
 	select {
@@ -100,9 +91,17 @@ func (p *Httpool) Do(ctx context.Context, req *http.Request) (*http.Response, er
 }
 
 func (p *Httpool) Get(ctx context.Context, url string) (resp *http.Response, err error) {
+	retryTimes := 0
+Retry:
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
-	return p.Do(ctx, req)
+
+	resp, err = p.do(ctx, req)
+	if err != nil && retryTimes < p.retry {
+		retryTimes++
+		goto Retry
+	}
+	return resp, err
 }
