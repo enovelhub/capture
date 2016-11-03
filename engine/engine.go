@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"net/url"
 	"reflect"
 	"strings"
@@ -111,7 +112,7 @@ var (
 	ErrNotFoundChapterURLs = errors.New("connot found book chapter urls by rc")
 )
 
-func (e *Engine) Exec(httpool *httpool.Httpool, homeURL string) (*book.Book, error) {
+func (e *Engine) Exec(httpool *httpool.Pool, homeURL string) (*book.Book, error) {
 	log := e.log
 
 	retbook := &book.Book{}
@@ -378,8 +379,13 @@ type chapterPageItem struct {
 	err   error
 }
 
-func NewGoqueryDocument(ctx context.Context, httpool *httpool.Httpool, url string) (doc *goquery.Document, err error) {
-	resp, err := httpool.Get(ctx, url)
+func NewGoqueryDocument(ctx context.Context, httpool *httpool.Pool, url string) (doc *goquery.Document, err error) {
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.WithContext(ctx)
+	resp, err := httpool.Do(req)
 	if err != nil {
 		return nil, err
 	}

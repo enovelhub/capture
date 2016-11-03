@@ -3,7 +3,6 @@ package engine
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"reflect"
 	"testing"
 	"time"
@@ -100,9 +99,9 @@ func TestEngineExec(t *testing.T) {
 		t.Error(fmt.Sprintf("%#v\n", err))
 	}
 
-	httpool := httpool.New(http.DefaultClient, 20, time.Second*8, 3)
+	httpool := httpool.New(2, 3, time.Second*8)
 	defer httpool.Close()
-	homeURL := "http://freenovelonline.com/241360-i-am-legend.html"
+	homeURL := "http://freenovelonline.com/2434268-a-perfect-ten.html"
 
 	book, err := en.Exec(httpool, homeURL)
 	if err != nil {
